@@ -1,7 +1,10 @@
 # scout2csv - Turn ScoutSuite Output(s) into a usable CSV file
 Now this is a story all about how
+
 My life got flipped turned upside down
+
 And I'd like to take a minute, just sit right there
+
 I'll tell you how I ended up writing this script...
 
 No I won't as it's client confidential (and I can't rap). None the less here's a script that may be useful for dealing with multiple ScoutSuite reports at once, or QAing an AWS report. The output is more detailed than the default CSV export and allows for items to be checked off as they are checked for validity or reported on.
