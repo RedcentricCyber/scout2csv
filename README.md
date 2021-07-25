@@ -16,8 +16,8 @@ etc...
 ```
 The script will look in all subfolders for the `scoutsuite_results_aws*.js` so it doesn't matter what the folders are called. Running it is as simple as `python3 scout2csv.py`.
 
-##Requirements
+## Requirements
 It has them just use `pip3 install` until it works. I imagine pandas is maybe the only none default library.
 
-##Why isn't this better documented?
+## Why isn't this better documented?
 I've just finished QAing a configuration report with double digit aws accounts. Would you want to even look at a computer at that point? I am more than a few ciders into my Sunday evening.
