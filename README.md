@@ -1,4 +1,4 @@
-# ScoutSuiteToCSV
+# scout2csv - Turn ScoutSuite Output(s) into a usable CSV file
 Now this is a story all about how
 My life got flipped turned upside down
 And I'd like to take a minute, just sit right there
