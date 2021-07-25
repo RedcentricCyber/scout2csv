@@ -1,11 +1,8 @@
 # scout2csv - Turn ScoutSuite Output(s) into a usable CSV file
-Now this is a story all about how
-
-My life got flipped turned upside down
-
-And I'd like to take a minute, just sit right there
-
-I'll tell you how I ended up writing this script...
+Now this is a story all about how<br/>
+My life got flipped turned upside down<br/>
+And I'd like to take a minute, just sit right there<br/>
+I'll tell you how I ended up writing this script...<br/>
 
 No I won't as it's client confidential (and I can't rap). None the less here's a script that may be useful for dealing with multiple ScoutSuite reports at once, or QAing an AWS report. The output is more detailed than the default CSV export and allows for items to be checked off as they are checked for validity or reported on.
 
@@ -23,4 +20,4 @@ The script will look in all subfolders for the `scoutsuite_results_aws*.js` so i
 It has them just use `pip3 install` until it works. I imagine pandas is maybe the only none default library.
 
 ##Why isn't this better documented?
-I've just finished QAing a configuration report with double digit aws accounts. Would you want to even look at a computer at that point?
+I've just finished QAing a configuration report with double digit aws accounts. Would you want to even look at a computer at that point? I am more than a few ciders into my Sunday evening.
