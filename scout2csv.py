@@ -1,3 +1,4 @@
+import argparse
 import json
 import pandas as pd
 from pathlib import Path
@@ -56,23 +57,51 @@ def parse_result_file(result_path):
     return findings
 
 
-if __name__ == "__main__":
-    output_file = "tool_output.csv"
-    results = list(Path(".").rglob("scoutsuite_results_aws*.js"))
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Convert ScoutSuite AWS result files into a single CSV.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "-i", "--input-dir",
+        type=Path,
+        default=Path("."),
+        help="Root directory to search recursively for scoutsuite_results_aws*.js files.",
+    )
+    parser.add_argument(
+        "-o", "--output",
+        type=Path,
+        default=Path("tool_output.csv"),
+        help="Path for the output CSV file.",
+    )
+    parser.add_argument(
+        "--level",
+        choices=["danger", "warning", "good"],
+        default=None,
+        help="Filter findings to only this severity level.",
+    )
+    return parser.parse_args()
 
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    results = list(args.input_dir.rglob("scoutsuite_results_aws*.js"))
     if not results:
-        print("No ScoutSuite result files found.")
+        print(f"No ScoutSuite result files found under '{args.input_dir}'.")
         exit(1)
 
     data = []
     for result in results:
         try:
             findings = parse_result_file(result)
+            if args.level:
+                findings = [f for f in findings if f.get('level') == args.level]
             data.extend(findings)
             print(f"Processed {result} ({len(findings)} findings)")
         except (ValueError, json.JSONDecodeError, KeyError) as e:
             print(f"Warning: skipping {result} — {e}")
 
     df = pd.DataFrame(data)
-    df.to_csv(output_file, index=False, encoding='utf-8-sig')
-    print(f"\nWrote {len(data)} rows to {output_file}")
+    df.to_csv(args.output, index=False, encoding='utf-8-sig')
+    print(f"\nWrote {len(data)} rows to {args.output}")
