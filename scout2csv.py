@@ -38,7 +38,7 @@ def parse_result_file(result_path):
                 continue
             for item in finding.get('items', []):
                 parts = item.split('.')
-                scoutid = parts[-2] if len(parts) >= 2 else item
+                scoutid = parts[-1] if parts else item
                 arn = scoutid_to_arn.get(scoutid, 'N/A')
                 findings.append({
                     'folder name': foldername,
