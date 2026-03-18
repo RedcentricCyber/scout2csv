@@ -40,10 +40,20 @@ def parse_result_file(result_path):
         for finding in service.get('findings', {}).values():
             if finding.get('flagged_items', 0) == 0:
                 continue
+            # display_path points to the resource level; path may point deeper (e.g. a sub-attribute).
+            # Use whichever is shallower so we look up the ARN on the actual resource object.
+            resource_path = finding.get('display_path') or finding.get('path', '')
+            resource_depth = len(resource_path.split('.')) if resource_path else 0
             for item in finding.get('items', []):
                 parts = item.split('.')
                 scoutid = parts[-1] if parts else item
-                arn = scoutid_to_arn.get(scoutid, 'N/A')
+                arn = None
+                # First try: ARN at the resource level indicated by display_path/path.
+                if resource_depth and len(parts) >= resource_depth:
+                    arn = scoutid_to_arn.get(parts[resource_depth - 1])
+                # Fallback: ARN keyed by the last path segment.
+                if not arn:
+                    arn = scoutid_to_arn.get(scoutid, 'N/A')
                 findings.append({
                     'folder name': foldername,
                     'account id': account_id,
