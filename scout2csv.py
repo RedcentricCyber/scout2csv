@@ -5,16 +5,20 @@ from pathlib import Path
 
 
 def extract_arns(json_object):
-    """Build a scoutid -> ARN mapping across all services and resource types."""
+    """Build a scoutid -> ARN mapping by recursively searching the entire JSON tree."""
     scoutid_to_arn = {}
-    for service_data in json_object.get('services', {}).values():
-        for region_data in service_data.get('regions', {}).values():
-            for resources in region_data.values():
-                if not isinstance(resources, dict):
-                    continue
-                for resource_name, resource_data in resources.items():
-                    if isinstance(resource_data, dict) and 'arn' in resource_data:
-                        scoutid_to_arn[resource_name] = resource_data['arn']
+
+    def _walk(node, key=None):
+        if isinstance(node, dict):
+            if key is not None and 'arn' in node and node['arn']:
+                scoutid_to_arn[key] = node['arn']
+            for k, v in node.items():
+                _walk(v, key=k)
+        elif isinstance(node, list):
+            for item in node:
+                _walk(item)
+
+    _walk(json_object)
     return scoutid_to_arn
 
 
@@ -36,21 +40,33 @@ def parse_result_file(result_path):
         for finding in service.get('findings', {}).values():
             if finding.get('flagged_items', 0) == 0:
                 continue
+            # display_path points to the resource level; path may point deeper (e.g. a sub-attribute).
+            # Use whichever is shallower so we look up the ARN on the actual resource object.
+            resource_path = finding.get('display_path') or finding.get('path', '')
+            resource_depth = len(resource_path.split('.')) if resource_path else 0
             for item in finding.get('items', []):
                 parts = item.split('.')
-                scoutid = parts[-2] if len(parts) >= 2 else item
-                arn = scoutid_to_arn.get(scoutid, 'N/A')
+                scoutid = parts[-1] if parts else item
+                arn = None
+                # First try: ARN at the resource level indicated by display_path/path.
+                if resource_depth and len(parts) >= resource_depth:
+                    arn = scoutid_to_arn.get(parts[resource_depth - 1])
+                # Fallback: ARN keyed by the last path segment.
+                if not arn:
+                    arn = scoutid_to_arn.get(scoutid, 'N/A')
+                # Region is at parts[2] when parts[1] == 'regions' (regional services).
+                region = parts[2] if len(parts) > 2 and parts[1] == 'regions' else 'global'
                 findings.append({
                     'folder name': foldername,
                     'account id': account_id,
                     'service': finding.get('service', 'N/A'),
+                    'region': region,
                     'title': finding.get('description', 'N/A'),
                     'rationale': finding.get('rationale', 'N/A'),
                     'level': finding.get('level', 'N/A'),
                     'remediation': finding.get('remediation', 'N/A'),
                     'checked #': finding.get('checked_items', 0),
                     'flagged #': finding.get('flagged_items', 0),
-                    'scoutid': scoutid,
                     'arn': arn,
                     'item': item,
                 })
