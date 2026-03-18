@@ -67,7 +67,6 @@ def parse_result_file(result_path):
                     'remediation': finding.get('remediation', 'N/A'),
                     'checked #': finding.get('checked_items', 0),
                     'flagged #': finding.get('flagged_items', 0),
-                    'scoutid': scoutid,
                     'arn': arn,
                     'item': item,
                 })
