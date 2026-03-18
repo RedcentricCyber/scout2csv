@@ -5,16 +5,20 @@ from pathlib import Path
 
 
 def extract_arns(json_object):
-    """Build a scoutid -> ARN mapping across all services and resource types."""
+    """Build a scoutid -> ARN mapping by recursively searching the entire JSON tree."""
     scoutid_to_arn = {}
-    for service_data in json_object.get('services', {}).values():
-        for region_data in service_data.get('regions', {}).values():
-            for resources in region_data.values():
-                if not isinstance(resources, dict):
-                    continue
-                for resource_name, resource_data in resources.items():
-                    if isinstance(resource_data, dict) and 'arn' in resource_data:
-                        scoutid_to_arn[resource_name] = resource_data['arn']
+
+    def _walk(node, key=None):
+        if isinstance(node, dict):
+            if key is not None and 'arn' in node and node['arn']:
+                scoutid_to_arn[key] = node['arn']
+            for k, v in node.items():
+                _walk(v, key=k)
+        elif isinstance(node, list):
+            for item in node:
+                _walk(item)
+
+    _walk(json_object)
     return scoutid_to_arn
 
 
