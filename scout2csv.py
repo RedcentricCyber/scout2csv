@@ -54,10 +54,13 @@ def parse_result_file(result_path):
                 # Fallback: ARN keyed by the last path segment.
                 if not arn:
                     arn = scoutid_to_arn.get(scoutid, 'N/A')
+                # Region is at parts[2] when parts[1] == 'regions' (regional services).
+                region = parts[2] if len(parts) > 2 and parts[1] == 'regions' else 'global'
                 findings.append({
                     'folder name': foldername,
                     'account id': account_id,
                     'service': finding.get('service', 'N/A'),
+                    'region': region,
                     'title': finding.get('description', 'N/A'),
                     'rationale': finding.get('rationale', 'N/A'),
                     'level': finding.get('level', 'N/A'),
